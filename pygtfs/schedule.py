@@ -3,6 +3,7 @@ from __future__ import (division, absolute_import, print_function,
 
 import sqlalchemy
 import sqlalchemy.orm
+from sqlalchemy.pool import NullPool
 
 from .gtfs_entities import gtfs_all, Feed, Base
 
@@ -32,7 +33,9 @@ class Schedule:
             self.db_connection = 'sqlite:///%s' % self.db_connection
         if self.db_connection.startswith('sqlite'):
             self.db_filename = self.db_connection
-        self.engine = sqlalchemy.create_engine(self.db_connection)
+            self.engine = sqlalchemy.create_engine(self.db_connection, poolclass=NullPool)
+        else:
+            self.engine = sqlalchemy.create_engine(self.db_connection)
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
         Base.metadata.create_all(self.engine)
